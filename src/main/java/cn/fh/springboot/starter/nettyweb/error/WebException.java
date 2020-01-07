@@ -3,12 +3,12 @@ package cn.fh.springboot.starter.nettyweb.error;
 /**
  * Created by wanghongfei on 2019/12/29.
  */
-public class BizException extends RuntimeException {
+public class WebException extends RuntimeException {
     /**
      * 仅包含message, 没有cause, 也不记录栈异常, 性能最高
      * @param msg
      */
-    public BizException(String msg) {
+    public WebException(String msg) {
         this(msg, false);
     }
 
@@ -17,7 +17,7 @@ public class BizException extends RuntimeException {
      * @param msg
      * @param recordStackTrace
      */
-    public BizException(String msg, boolean recordStackTrace) {
+    public WebException(String msg, boolean recordStackTrace) {
         super(msg, null, false, recordStackTrace);
     }
 
@@ -26,7 +26,7 @@ public class BizException extends RuntimeException {
      * @param msg
      * @param cause
      */
-    public BizException(String msg, Throwable cause) {
+    public WebException(String msg, Throwable cause) {
         super(msg, cause, false, true);
     }
 }

@@ -3,7 +3,7 @@ package cn.fh.springboot.starter.nettyweb.error;
 /**
  * Created by wanghongfei on 2020/1/7.
  */
-public class NettyWebStartException extends BizException {
+public class NettyWebStartException extends WebException {
     public NettyWebStartException(String msg) {
         super(msg);
     }

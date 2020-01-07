@@ -1,8 +1,7 @@
 package cn.fh.springboot.starter.nettyweb.network.handler;
 
 import cn.fh.springboot.starter.nettyweb.autoconfig.NettyWebProp;
-import cn.fh.springboot.starter.nettyweb.error.BizException;
-import cn.fh.springboot.starter.nettyweb.error.ReadableException;
+import cn.fh.springboot.starter.nettyweb.error.WebException;
 import cn.fh.springboot.starter.nettyweb.network.RequestHandler;
 import cn.fh.springboot.starter.nettyweb.network.inject.InjectHeaders;
 import cn.fh.springboot.starter.nettyweb.network.inject.InjectLoginToken;
@@ -61,20 +60,20 @@ public class NettyWebHandler extends ChannelInboundHandlerAdapter {
         // 取出service
         RequestHandler moonApi = pathServiceMap.get(path);
         if (null == moonApi) {
-            throw new ReadableException("404");
+            throw new WebException("404");
         }
 
         // 取出参数对象类型
         Class paramType = pathTypeMap.get(path);
         if (null == paramType) {
-            throw new ReadableException("lack argument for this path");
+            throw new WebException("lack argument for this path");
         }
 
 
         // 将body转成string
         String body = extractRequestBody(httpRequest);
         if (StringUtils.isEmpty(body)) {
-            throw new ReadableException("body is empty");
+            throw new WebException("body is empty");
         }
 
         // 生成唯一标识
@@ -112,14 +111,10 @@ public class NettyWebHandler extends ChannelInboundHandlerAdapter {
 
         HttpResponseStatus status;
         String msg;
-        if (cause instanceof ReadableException) {
+        if (cause instanceof WebException) {
             // 业务异常
             status = HttpResponseStatus.BAD_REQUEST;
             msg = cause.getMessage();
-
-        } else if (cause instanceof BizException) {
-            status = HttpResponseStatus.BAD_REQUEST;
-            msg = "biz error";
 
         } else {
             status = HttpResponseStatus.INTERNAL_SERVER_ERROR;
@@ -157,7 +152,7 @@ public class NettyWebHandler extends ChannelInboundHandlerAdapter {
 
             String loginToken = httpRequest.headers().get(prop.getLoginTokenHeaderName());
             if (StringUtils.isEmpty(loginToken)) {
-                throw new ReadableException("缺少token");
+                throw new WebException("lack token");
             }
 
             injectLoginToken.setLoginToken(loginToken);
@@ -181,7 +176,7 @@ public class NettyWebHandler extends ChannelInboundHandlerAdapter {
 
         } catch (Throwable e) {
             log.warn("failed to deserialize request json", e);
-            throw new ReadableException("参数错误");
+            throw new WebException("body does not match");
         }
     }
 

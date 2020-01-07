@@ -1,7 +1,7 @@
 package cn.fh.springboot.starter.nettyweb.autoconfig;
 
 import cn.fh.springboot.starter.nettyweb.annotation.HttpApi;
-import cn.fh.springboot.starter.nettyweb.error.BizException;
+import cn.fh.springboot.starter.nettyweb.error.WebException;
 import cn.fh.springboot.starter.nettyweb.network.NettyWebServer;
 import cn.fh.springboot.starter.nettyweb.network.RequestHandler;
 import cn.fh.springboot.starter.nettyweb.network.handler.NettyWebHandler;
@@ -34,7 +34,7 @@ public class ServiceRegisterBean {
         Map<String, Object> apiBeanMap = springContext.getBeansWithAnnotation(HttpApi.class);
         apiBeanMap.forEach((beanName, beanObj) -> {
             if (!(beanObj instanceof RequestHandler)) {
-                throw new BizException("api bean " + beanObj.getClass() + " is not of type RequestHandler");
+                throw new WebException("api bean " + beanObj.getClass() + " is not of type RequestHandler");
             }
 
             HttpApi apiAnn = beanObj.getClass().getAnnotation(HttpApi.class);
