@@ -17,7 +17,11 @@ import org.springframework.stereotype.Component;
 public class NettyWebProp {
     private Integer bossGroupThreadCount = 2;
     private Integer workGroupThreadCount = 0;
-    private Integer httpObjectMaxSize = 1024 * 1024 * 5;
 
+    private Integer httpObjectMaxSize = 1024 * 1024 * 5;
     private String loginTokenHeaderName = "Login-Token";
+
+    private Integer servicePoolCoreSize = 5;
+    private Integer servicePoolMaxSize = 10;
+    private Integer servicePoolQueueSize = 50;
 }

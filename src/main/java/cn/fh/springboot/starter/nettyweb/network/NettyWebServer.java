@@ -1,6 +1,7 @@
 package cn.fh.springboot.starter.nettyweb.network;
 
 import cn.fh.springboot.starter.nettyweb.autoconfig.NettyWebProp;
+import cn.fh.springboot.starter.nettyweb.error.NettyWebStartException;
 import cn.fh.springboot.starter.nettyweb.network.handler.NettyWebHandler;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
@@ -16,6 +17,7 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpServerCodec;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.mutable.MutableObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
@@ -40,10 +42,13 @@ public class NettyWebServer {
     @Autowired
     private NettyWebProp prop;
 
+    private volatile boolean isClosing = false;
+
     public void start() {
         log.info("Starting NettyWeb");
 
         CountDownLatch webStartLatch = new CountDownLatch(1);
+        MutableObject<RuntimeException> excaptionBox = new MutableObject();
 
         Runnable webStartLogic = () -> {
             initEventLoop();
@@ -70,11 +75,17 @@ public class NettyWebServer {
                 webStartLatch.countDown();
 
                 f.channel().closeFuture().sync();
+                stop();
                 log.info("NettyWeb stopped");
 
             } catch (Throwable e) {
                 log.error("", e);
+
+                RuntimeException newExp = new NettyWebStartException("failed to start NettyWeb", e);
+                excaptionBox.setValue(newExp);
+
                 stop();
+                webStartLatch.countDown();
             }
 
         };
@@ -84,6 +95,9 @@ public class NettyWebServer {
 
         try {
             webStartLatch.await(30, TimeUnit.SECONDS);
+            if (null != excaptionBox.getValue()) {
+                throw excaptionBox.getValue();
+            }
 
         } catch (InterruptedException e) {
             e.printStackTrace();
@@ -92,10 +106,15 @@ public class NettyWebServer {
 
     @PreDestroy
     public void stop() {
-        log.info("shutting down all event loop");
+        if (!isClosing) {
+            isClosing = true;
 
-        bossGroup.shutdownGracefully();
-        workGroup.shutdownGracefully();
+            log.info("shutting down all event loop");
+
+            bossGroup.shutdownGracefully();
+            workGroup.shutdownGracefully();
+            handler.close();
+        }
     }
 
     private Class determineServerSocketChannel() {

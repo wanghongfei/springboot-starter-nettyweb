@@ -128,6 +128,12 @@ public class NettyWebHandler extends ChannelInboundHandlerAdapter {
         ctx.close();
     }
 
+    public void close() {
+        if (null != this.servicePool) {
+            this.servicePool.shutdownNow();
+        }
+    }
+
     public void registerService(String path, Class voType, RequestHandler service) {
         log.info("register service: {} -> {}, param type: {}", path, service.getClass(), voType);
 
@@ -164,11 +170,11 @@ public class NettyWebHandler extends ChannelInboundHandlerAdapter {
     @PostConstruct
     private void initPool() {
         servicePool = new ThreadPoolExecutor(
-                2,
-                5,
+                prop.getServicePoolCoreSize(),
+                prop.getServicePoolMaxSize(),
                 60L,
                 TimeUnit.SECONDS,
-                new LinkedBlockingQueue<>(100),
+                new LinkedBlockingQueue<>(prop.getServicePoolQueueSize()),
                 new ThreadFactoryBuilder().setNameFormat(SERVICE_POOL_PATTERN).build(),
                 new ThreadPoolExecutor.AbortPolicy()
         );
