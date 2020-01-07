@@ -48,7 +48,7 @@ public class NettyWebServer {
         log.info("Starting NettyWeb");
 
         CountDownLatch webStartLatch = new CountDownLatch(1);
-        MutableObject<RuntimeException> excaptionBox = new MutableObject();
+        MutableObject<RuntimeException> excaptionBox = new MutableObject<>();
 
         Runnable webStartLogic = () -> {
             initEventLoop();

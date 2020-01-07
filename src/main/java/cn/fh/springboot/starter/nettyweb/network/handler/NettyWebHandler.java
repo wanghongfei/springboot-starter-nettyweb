@@ -4,6 +4,7 @@ import cn.fh.springboot.starter.nettyweb.autoconfig.NettyWebProp;
 import cn.fh.springboot.starter.nettyweb.error.BizException;
 import cn.fh.springboot.starter.nettyweb.error.ReadableException;
 import cn.fh.springboot.starter.nettyweb.network.RequestHandler;
+import cn.fh.springboot.starter.nettyweb.network.inject.InjectHeaders;
 import cn.fh.springboot.starter.nettyweb.network.inject.InjectLoginToken;
 import cn.fh.springboot.starter.nettyweb.utils.NettyWebUtils;
 import cn.fh.springboot.starter.nettyweb.utils.SnowFlake;
@@ -22,6 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import javax.annotation.PostConstruct;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -71,6 +73,9 @@ public class NettyWebHandler extends ChannelInboundHandlerAdapter {
 
         // 将body转成string
         String body = extractRequestBody(httpRequest);
+        if (StringUtils.isEmpty(body)) {
+            throw new ReadableException("body is empty");
+        }
 
         // 生成唯一标识
         Long uid = SnowFlake.genId();
@@ -146,14 +151,27 @@ public class NettyWebHandler extends ChannelInboundHandlerAdapter {
     }
 
     private void injectFields(Object param, FullHttpRequest httpRequest) {
+        // 注入loginToken
         if (param instanceof InjectLoginToken) {
-            // 注入loginToken
             InjectLoginToken injectLoginToken = (InjectLoginToken) param;
+
             String loginToken = httpRequest.headers().get(prop.getLoginTokenHeaderName());
             if (StringUtils.isEmpty(loginToken)) {
                 throw new ReadableException("缺少token");
             }
+
             injectLoginToken.setLoginToken(loginToken);
+        }
+
+        // 注入header
+        if (param instanceof InjectHeaders) {
+            InjectHeaders injectHeaders = (InjectHeaders) param;
+
+            List<Map.Entry<String, String>> entries = httpRequest.headers().entries();
+            Map<String, String> headerMap = new HashMap<>();
+            entries.forEach(kv -> headerMap.put(kv.getKey(), kv.getValue()));
+
+            injectHeaders.setHeaderMap(headerMap);
         }
     }
 

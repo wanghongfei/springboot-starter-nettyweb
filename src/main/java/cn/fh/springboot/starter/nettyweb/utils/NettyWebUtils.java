@@ -22,7 +22,7 @@ public class NettyWebUtils {
 
         String json = JSON.toJSONString(response);
 
-        log.info("{} response for {}: {}", uid, prefix, json);
+        log.info("{} response for {}: {}", prefix, uid, json);
 
         FullHttpResponse httpResponse =
                 new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, status, Unpooled.copiedBuffer(json, StandardCharsets.UTF_8));
@@ -39,7 +39,7 @@ public class NettyWebUtils {
 
         String json = JSON.toJSONString(response);
 
-        log.info("{} response for {}: {}", uid, prefix, json);
+        log.info("{} response for {}: {}", prefix, uid, json);
 
         FullHttpResponse httpResponse =
                 new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, Unpooled.copiedBuffer(json, StandardCharsets.UTF_8));
