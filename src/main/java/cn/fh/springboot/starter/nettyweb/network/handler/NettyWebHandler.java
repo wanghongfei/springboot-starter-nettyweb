@@ -5,6 +5,7 @@ import cn.fh.springboot.starter.nettyweb.error.WebException;
 import cn.fh.springboot.starter.nettyweb.network.RequestHandler;
 import cn.fh.springboot.starter.nettyweb.network.inject.InjectHeaders;
 import cn.fh.springboot.starter.nettyweb.network.inject.InjectLoginToken;
+import cn.fh.springboot.starter.nettyweb.network.inject.InjectRequestId;
 import cn.fh.springboot.starter.nettyweb.utils.NettyWebUtils;
 import cn.fh.springboot.starter.nettyweb.utils.SnowFlake;
 import com.alibaba.fastjson.JSON;
@@ -84,7 +85,7 @@ public class NettyWebHandler extends ChannelInboundHandlerAdapter {
         // 反序列化
         Object paramObject = transBodyType(body, paramType);
         // 注入所需字段
-        injectFields(paramObject, httpRequest);
+        injectFields(paramObject, httpRequest, uid);
 
         // 调用service
         servicePool.execute(() -> {
@@ -145,7 +146,7 @@ public class NettyWebHandler extends ChannelInboundHandlerAdapter {
         return request.content().toString(StandardCharsets.UTF_8);
     }
 
-    private void injectFields(Object param, FullHttpRequest httpRequest) {
+    private void injectFields(Object param, FullHttpRequest httpRequest, Long reqId) {
         // 注入loginToken
         if (param instanceof InjectLoginToken) {
             InjectLoginToken injectLoginToken = (InjectLoginToken) param;
@@ -167,6 +168,11 @@ public class NettyWebHandler extends ChannelInboundHandlerAdapter {
             entries.forEach(kv -> headerMap.put(kv.getKey(), kv.getValue()));
 
             injectHeaders.setHeaderMap(headerMap);
+        }
+
+        if (param instanceof InjectRequestId) {
+            InjectRequestId injectRequestId = (InjectRequestId) param;
+            injectRequestId.setRequestId(reqId);
         }
     }
 
