@@ -24,4 +24,6 @@ public class NettyWebProp {
     private Integer servicePoolCoreSize = 5;
     private Integer servicePoolMaxSize = 10;
     private Integer servicePoolQueueSize = 50;
+
+    private Boolean startWebServer = true;
 }
