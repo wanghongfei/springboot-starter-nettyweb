@@ -39,8 +39,7 @@ public class ServiceRegisterBean {
             }
 
             HttpApi apiAnn = beanObj.getClass().getAnnotation(HttpApi.class);
-            // handler.registerService(apiAnn.path(), apiAnn.paramType(), (RequestHandler) beanObj);
-            webRouter.registerService(HttpMethod.valueOf(apiAnn.method()), apiAnn.path(), apiAnn.paramType(), (RequestHandler) beanObj);
+            webRouter.registerService(HttpMethod.valueOf(apiAnn.method().toUpperCase()), apiAnn.path(), apiAnn.paramType(), (RequestHandler) beanObj);
         });
 
         log.info("done scanning @HttpApi");

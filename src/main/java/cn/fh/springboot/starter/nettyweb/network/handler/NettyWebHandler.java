@@ -27,6 +27,7 @@ import org.springframework.util.ReflectionUtils;
 
 import javax.annotation.PostConstruct;
 import java.lang.reflect.Field;
+import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
@@ -178,6 +179,9 @@ public class NettyWebHandler extends ChannelInboundHandlerAdapter {
 
                     } else if (field.getType() == String.class) {
                         // do nothing
+
+                    } else if (field.getType() == BigDecimal.class) {
+                        fieldValue = new BigDecimal(value.get(0));
 
                     } else {
                         throw new IllegalStateException("unsupported param type " + field);
