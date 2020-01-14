@@ -1,6 +1,7 @@
 package cn.fh.springboot.starter.nettyweb.autoconfig;
 
 import cn.fh.springboot.starter.nettyweb.network.NettyWebServer;
+import cn.fh.springboot.starter.nettyweb.network.WebRouter;
 import cn.fh.springboot.starter.nettyweb.network.handler.NettyWebHandler;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -12,6 +13,7 @@ import org.springframework.context.annotation.Configuration;
  */
 @Configuration
 @EnableConfigurationProperties(NettyWebProp.class)
+@ConditionalOnProperty(prefix = "nettyweb", name = "start-web-server", matchIfMissing = true, havingValue = "true")
 public class NettyWebAutoConfiguration {
     @Bean
     public NettyWebHandler matchHttpHandler() {
@@ -19,14 +21,17 @@ public class NettyWebAutoConfiguration {
     }
 
     @Bean
-    @ConditionalOnProperty(prefix = "nettyweb", name = "start-web-server", matchIfMissing = true, havingValue = "true")
-    public NettyWebServer matchHttpServer() {
+    public NettyWebServer nettyWebServer() {
         return new NettyWebServer();
     }
 
     @Bean
-    @ConditionalOnProperty(prefix = "nettyweb", name = "start-web-server", matchIfMissing = true, havingValue = "true")
     public ServiceRegisterBean serviceRegisterBean() {
         return new ServiceRegisterBean();
+    }
+
+    @Bean
+    public WebRouter webRouter() {
+        return new WebRouter();
     }
 }

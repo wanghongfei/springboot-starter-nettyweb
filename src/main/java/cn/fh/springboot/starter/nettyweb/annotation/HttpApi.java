@@ -17,4 +17,6 @@ public @interface HttpApi {
     String path() default "";
 
     Class paramType();
+
+    String method() default "POST";
 }

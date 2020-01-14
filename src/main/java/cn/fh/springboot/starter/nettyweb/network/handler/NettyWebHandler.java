@@ -3,6 +3,7 @@ package cn.fh.springboot.starter.nettyweb.network.handler;
 import cn.fh.springboot.starter.nettyweb.autoconfig.NettyWebProp;
 import cn.fh.springboot.starter.nettyweb.error.WebException;
 import cn.fh.springboot.starter.nettyweb.network.RequestHandler;
+import cn.fh.springboot.starter.nettyweb.network.WebRouter;
 import cn.fh.springboot.starter.nettyweb.network.inject.InjectHeaders;
 import cn.fh.springboot.starter.nettyweb.network.inject.InjectLoginToken;
 import cn.fh.springboot.starter.nettyweb.network.inject.InjectRequestId;
@@ -14,13 +15,18 @@ import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.codec.http.FullHttpRequest;
+import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.HttpResponseStatus;
+import io.netty.handler.codec.http.QueryStringDecoder;
 import io.netty.util.AttributeKey;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.ReflectionUtils;
 
 import javax.annotation.PostConstruct;
+import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
@@ -40,8 +46,8 @@ public class NettyWebHandler extends ChannelInboundHandlerAdapter {
     @Autowired
     private NettyWebProp prop;
 
-    private Map<String, Class> pathTypeMap = new HashMap<>();
-    private Map<String, RequestHandler> pathServiceMap = new HashMap<>();
+    @Autowired
+    private WebRouter router;
 
     private ThreadPoolExecutor servicePool;
 
@@ -53,19 +59,20 @@ public class NettyWebHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
         FullHttpRequest httpRequest = (FullHttpRequest) msg;
+        HttpMethod method = httpRequest.method();
 
         // 取出path
         String path = httpRequest.uri();
         ctx.channel().attr(uriKey).set(path);
 
         // 取出service
-        RequestHandler moonApi = pathServiceMap.get(path);
+        RequestHandler moonApi = router.matchHandler(method, path);
         if (null == moonApi) {
             throw new WebException("404");
         }
 
         // 取出参数对象类型
-        Class paramType = pathTypeMap.get(path);
+        Class paramType = router.matchArgType(method, path);
         if (null == paramType) {
             throw new WebException("lack argument for this path");
         }
@@ -82,10 +89,8 @@ public class NettyWebHandler extends ChannelInboundHandlerAdapter {
         ctx.channel().attr(uidKey).set(uid);
         log.info("{} request for {}: {}", uid, path, body);
 
-        // 反序列化
-        Object paramObject = transBodyType(body, paramType);
-        // 注入所需字段
-        injectFields(paramObject, httpRequest, uid);
+        // 解析参数
+        Object paramObject = deserializeParam(httpRequest, paramType, uid);
 
         // 调用service
         servicePool.execute(() -> {
@@ -135,11 +140,51 @@ public class NettyWebHandler extends ChannelInboundHandlerAdapter {
         }
     }
 
-    public void registerService(String path, Class voType, RequestHandler service) {
-        log.info("register service: {} -> {}, param type: {}", path, service.getClass(), voType);
 
-        this.pathTypeMap.put(path, voType);
-        this.pathServiceMap.put(path, service);
+    private Object deserializeParam(FullHttpRequest httpRequest, Class<?> paramType, Long uid) {
+        Object ret;
+        if (httpRequest.method() == HttpMethod.POST) {
+            // 将body转成string
+            String body = extractRequestBody(httpRequest);
+            if (StringUtils.isEmpty(body)) {
+                throw new WebException("body is empty");
+            }
+
+            // 反序列化
+            Object paramObject = transBodyType(body, paramType);
+
+            ret = paramObject;
+
+        } else {
+            // 是GET请求
+            QueryStringDecoder decoder = new QueryStringDecoder(httpRequest.uri());
+
+            // 构造参数对象
+            Object param = BeanUtils.instantiateClass(paramType);
+
+            // 反射赋值
+            decoder.parameters().forEach((key, value) -> {
+                // value是一个List, 只取第一个元素
+                Field field = ReflectionUtils.findField(paramType, key);
+                if (null == field) {
+                    return;
+                }
+
+                if (!field.getType().isAssignableFrom(String.class)) {
+                    throw new IllegalStateException("support only string type in GET request");
+                }
+
+                ReflectionUtils.makeAccessible(field);
+                ReflectionUtils.setField(field, param, value.get(0));
+            });
+
+            ret = param;
+        }
+
+        // 注入所需字段
+        injectFields(ret, httpRequest, uid);
+
+        return ret;
     }
 
     private String extractRequestBody(FullHttpRequest request) {
