@@ -80,7 +80,7 @@ public class NettyWebHandler extends ChannelInboundHandlerAdapter {
 
         // 将body转成string
         String body = extractRequestBody(httpRequest);
-        if (StringUtils.isEmpty(body)) {
+        if (method == HttpMethod.POST && StringUtils.isEmpty(body)) {
             throw new WebException("body is empty");
         }
 
@@ -90,7 +90,7 @@ public class NettyWebHandler extends ChannelInboundHandlerAdapter {
         log.info("{} request for {}: {}", uid, path, body);
 
         // 解析参数
-        Object paramObject = deserializeParam(httpRequest, paramType, uid);
+        Object paramObject = deserializeParam(httpRequest, paramType, uid, body);
 
         // 调用service
         servicePool.execute(() -> {
@@ -141,19 +141,16 @@ public class NettyWebHandler extends ChannelInboundHandlerAdapter {
     }
 
 
-    private Object deserializeParam(FullHttpRequest httpRequest, Class<?> paramType, Long uid) {
+    private Object deserializeParam(FullHttpRequest httpRequest, Class<?> paramType, Long uid, String body) {
         Object ret;
         if (httpRequest.method() == HttpMethod.POST) {
             // 将body转成string
-            String body = extractRequestBody(httpRequest);
             if (StringUtils.isEmpty(body)) {
                 throw new WebException("body is empty");
             }
 
             // 反序列化
-            Object paramObject = transBodyType(body, paramType);
-
-            ret = paramObject;
+            ret = transBodyType(body, paramType);
 
         } else {
             // 是GET请求
@@ -170,12 +167,29 @@ public class NettyWebHandler extends ChannelInboundHandlerAdapter {
                     return;
                 }
 
-                if (!field.getType().isAssignableFrom(String.class)) {
-                    throw new IllegalStateException("support only string type in GET request");
+                Object fieldValue = value.get(0);
+
+                try {
+                    if (field.getType() == Integer.class) {
+                        fieldValue = Integer.valueOf(value.get(0));
+
+                    } else if (field.getType() == Long.class) {
+                        fieldValue = Long.valueOf(value.get(0));
+
+                    } else if (field.getType() == String.class) {
+                        // do nothing
+
+                    } else {
+                        throw new IllegalStateException("unsupported param type " + field);
+                    }
+
+                } catch (NumberFormatException e) {
+                    throw new WebException("invalid arg type");
                 }
 
+
                 ReflectionUtils.makeAccessible(field);
-                ReflectionUtils.setField(field, param, value.get(0));
+                ReflectionUtils.setField(field, param, fieldValue);
             });
 
             ret = param;
