@@ -15,9 +15,9 @@ import java.nio.charset.StandardCharsets;
  * Created by wanghongfei on 2019/11/4.
  */
 public class NettyWebUtils {
-    public static FullHttpResponse buildErrResponse(String message, HttpResponseStatus status, Logger log, String prefix, Long uid) {
+    public static FullHttpResponse buildErrResponse(String message, int code, Logger log, String prefix, Long uid) {
         CommonResponse response = new CommonResponse();
-        response.setCode(status.code());
+        response.setCode(code);
         response.setMessage(message);
 
         String json = JSON.toJSONString(response);
@@ -25,7 +25,7 @@ public class NettyWebUtils {
         log.info("{} response for {}: {}", prefix, uid, json);
 
         FullHttpResponse httpResponse =
-                new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, status, Unpooled.copiedBuffer(json, StandardCharsets.UTF_8));
+                new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, Unpooled.copiedBuffer(json, StandardCharsets.UTF_8));
         httpResponse.headers().add("Content-Type", "application/json;charset=utf8");
 
         return httpResponse;

@@ -16,7 +16,6 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpMethod;
-import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.QueryStringDecoder;
 import io.netty.util.AttributeKey;
 import lombok.extern.slf4j.Slf4j;
@@ -49,6 +48,9 @@ public class NettyWebHandler extends ChannelInboundHandlerAdapter {
 
     @Autowired
     private WebRouter router;
+
+    @Autowired
+    private NettyWebExceptionHandler exceptionHandler;
 
     private ThreadPoolExecutor servicePool;
 
@@ -116,22 +118,12 @@ public class NettyWebHandler extends ChannelInboundHandlerAdapter {
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
         log.error("get exception:", cause);
 
-        HttpResponseStatus status;
-        String msg;
-        if (cause instanceof WebException) {
-            // 业务异常
-            status = HttpResponseStatus.BAD_REQUEST;
-            msg = cause.getMessage();
-
-        } else {
-            status = HttpResponseStatus.INTERNAL_SERVER_ERROR;
-            msg = "internal error";
-        }
+        NettyWebExceptionHandler.CodeAndMessage codeAndMessage = exceptionHandler.handleException(cause);
 
         String path = ctx.channel().attr(uriKey).get();
         Long uid = ctx.channel().attr(uidKey).get();
 
-        ctx.writeAndFlush(NettyWebUtils.buildErrResponse(msg, status, log, path, uid));
+        ctx.writeAndFlush(NettyWebUtils.buildErrResponse(codeAndMessage.getMessage(), codeAndMessage.getCode(), log, path, uid));
         ctx.close();
     }
 

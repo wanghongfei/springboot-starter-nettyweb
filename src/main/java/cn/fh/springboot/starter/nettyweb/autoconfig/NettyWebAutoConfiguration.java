@@ -2,7 +2,9 @@ package cn.fh.springboot.starter.nettyweb.autoconfig;
 
 import cn.fh.springboot.starter.nettyweb.network.NettyWebServer;
 import cn.fh.springboot.starter.nettyweb.network.WebRouter;
+import cn.fh.springboot.starter.nettyweb.network.handler.NettyWebExceptionHandler;
 import cn.fh.springboot.starter.nettyweb.network.handler.NettyWebHandler;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -33,5 +35,11 @@ public class NettyWebAutoConfiguration {
     @Bean
     public WebRouter webRouter() {
         return new WebRouter();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public NettyWebExceptionHandler nettyWebExceptionHandler() {
+        return new NettyWebExceptionHandler();
     }
 }
