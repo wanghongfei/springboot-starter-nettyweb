@@ -90,7 +90,7 @@ public class NettyWebHandler extends ChannelInboundHandlerAdapter {
         // 生成唯一标识
         Long uid = SnowFlake.genId();
         ctx.channel().attr(uidKey).set(uid);
-        log.info("{} request for {}: {}", uid, path, body);
+        log.info("{} request for {} {}: {}", uid, method, path, body);
 
         // 解析参数
         Object paramObject = deserializeParam(httpRequest, paramType, uid, body);
