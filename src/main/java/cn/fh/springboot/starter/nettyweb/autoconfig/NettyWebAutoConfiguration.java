@@ -4,6 +4,7 @@ import cn.fh.springboot.starter.nettyweb.network.NettyWebServer;
 import cn.fh.springboot.starter.nettyweb.network.WebRouter;
 import cn.fh.springboot.starter.nettyweb.network.handler.NettyWebExceptionHandler;
 import cn.fh.springboot.starter.nettyweb.network.handler.NettyWebHandler;
+import cn.fh.springboot.starter.nettyweb.validation.ValidatorMapping;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -41,5 +42,10 @@ public class NettyWebAutoConfiguration {
     @ConditionalOnMissingBean
     public NettyWebExceptionHandler nettyWebExceptionHandler() {
         return new NettyWebExceptionHandler();
+    }
+
+    @Bean
+    public ValidatorMapping validatorMapping() {
+        return new ValidatorMapping();
     }
 }

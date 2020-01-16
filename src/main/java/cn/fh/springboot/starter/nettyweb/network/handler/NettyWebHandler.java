@@ -1,5 +1,6 @@
 package cn.fh.springboot.starter.nettyweb.network.handler;
 
+import cn.fh.springboot.starter.nettyweb.annotation.validation.Validation;
 import cn.fh.springboot.starter.nettyweb.autoconfig.NettyWebProp;
 import cn.fh.springboot.starter.nettyweb.error.WebException;
 import cn.fh.springboot.starter.nettyweb.network.RequestHandler;
@@ -9,6 +10,7 @@ import cn.fh.springboot.starter.nettyweb.network.inject.InjectLoginToken;
 import cn.fh.springboot.starter.nettyweb.network.inject.InjectRequestId;
 import cn.fh.springboot.starter.nettyweb.utils.NettyWebUtils;
 import cn.fh.springboot.starter.nettyweb.utils.SnowFlake;
+import cn.fh.springboot.starter.nettyweb.validation.ValidatorMapping;
 import com.alibaba.fastjson.JSON;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import io.netty.channel.ChannelHandler;
@@ -25,6 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.ReflectionUtils;
 
 import javax.annotation.PostConstruct;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
@@ -51,6 +54,9 @@ public class NettyWebHandler extends ChannelInboundHandlerAdapter {
 
     @Autowired
     private NettyWebExceptionHandler exceptionHandler;
+
+    @Autowired
+    private ValidatorMapping validatorMapping;
 
     private ThreadPoolExecutor servicePool;
 
@@ -95,6 +101,9 @@ public class NettyWebHandler extends ChannelInboundHandlerAdapter {
         // 解析参数
         Object paramObject = deserializeParam(httpRequest, paramType, uid, body);
 
+        // todo 执行参数验证
+        validateParam(paramObject);
+
         // 调用service
         servicePool.execute(() -> {
             try {
@@ -133,6 +142,24 @@ public class NettyWebHandler extends ChannelInboundHandlerAdapter {
         }
     }
 
+    private void validateParam(Object param) {
+        Class<?> type = param.getClass();
+        Validation annValidation = type.getAnnotation(Validation.class);
+        if (null == annValidation) {
+            // 不需要验证
+            return;
+        }
+
+
+        ReflectionUtils.doWithFields(type, field -> {
+            ReflectionUtils.makeAccessible(field);
+
+            Annotation[] anns = field.getAnnotations();
+            for (Annotation an : anns) {
+                validatorMapping.invokeValidator(an, field.get(param));
+            }
+        });
+    }
 
     private Object deserializeParam(FullHttpRequest httpRequest, Class<?> paramType, Long uid, String body) {
         Object ret;
