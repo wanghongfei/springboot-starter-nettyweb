@@ -8,7 +8,7 @@ import java.lang.annotation.Target;
 /**
  * Created by wanghongfei on 2020/1/16.
  */
-@Target({ElementType.TYPE})
+@Target({ElementType.TYPE, ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Validation {
 }

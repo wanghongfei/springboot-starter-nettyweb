@@ -101,8 +101,8 @@ public class NettyWebHandler extends ChannelInboundHandlerAdapter {
         // 解析参数
         Object paramObject = deserializeParam(httpRequest, paramType, uid, body);
 
-        // todo 执行参数验证
-        validateParam(paramObject);
+        // 执行参数验证
+        validateParam(paramObject, false);
 
         // 调用service
         servicePool.execute(() -> {
@@ -142,12 +142,14 @@ public class NettyWebHandler extends ChannelInboundHandlerAdapter {
         }
     }
 
-    private void validateParam(Object param) {
+    private void validateParam(Object param, boolean validateDirectly) {
         Class<?> type = param.getClass();
-        Validation annValidation = type.getAnnotation(Validation.class);
-        if (null == annValidation) {
-            // 不需要验证
-            return;
+        if (!validateDirectly) {
+            Validation annValidation = type.getAnnotation(Validation.class);
+            if (null == annValidation) {
+                // 不需要验证
+                return;
+            }
         }
 
 
@@ -156,7 +158,14 @@ public class NettyWebHandler extends ChannelInboundHandlerAdapter {
 
             Annotation[] anns = field.getAnnotations();
             for (Annotation an : anns) {
-                validatorMapping.invokeValidator(an, field.get(param), field.getType());
+                Object fieldValue = field.get(param);
+                validatorMapping.invokeValidator(an, fieldValue, field.getType());
+
+                // 如果有@Validation注解
+                if (an instanceof Validation) {
+                    // 递归验证
+                    validateParam(fieldValue, true);
+                }
             }
         });
     }
