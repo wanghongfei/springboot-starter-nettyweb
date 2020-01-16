@@ -5,6 +5,7 @@ import cn.fh.springboot.starter.nettyweb.annotation.validation.NotNull;
 import cn.fh.springboot.starter.nettyweb.annotation.validation.NumberSize;
 import cn.fh.springboot.starter.nettyweb.annotation.validation.StringCandidate;
 import cn.fh.springboot.starter.nettyweb.annotation.validation.StringLen;
+import cn.fh.springboot.starter.nettyweb.annotation.validation.StringReg;
 
 import java.lang.annotation.Annotation;
 import java.util.HashMap;
@@ -22,6 +23,7 @@ public class ValidatorMapping {
         typeValidatorMap.put(NumberSize.class, new NumberSizeValidator());
         typeValidatorMap.put(CollectionNotEmpty.class, new CollectionNotEmptyValidator());
         typeValidatorMap.put(NotNull.class, new NotNullValidator());
+        typeValidatorMap.put(StringReg.class, new StringRegValidator());
     }
 
     public WebValidator<?, ?> getValidator(Class<?> argType) {
