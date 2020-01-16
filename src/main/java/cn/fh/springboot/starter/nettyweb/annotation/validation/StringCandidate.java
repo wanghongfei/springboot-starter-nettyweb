@@ -10,8 +10,8 @@ import java.lang.annotation.Target;
  */
 @Target({ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface StringLen {
-    int min();
-    int max();
+public @interface StringCandidate {
+    String[] candidates();
+
     String message() default "";
 }

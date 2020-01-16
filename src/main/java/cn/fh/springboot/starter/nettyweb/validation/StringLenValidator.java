@@ -15,4 +15,9 @@ public class StringLenValidator implements WebValidator<String, StringLen> {
             throw new ValidationException(anntation.message());
         }
     }
+
+    @Override
+    public boolean isSupported(Class<?> type) {
+        return type == String.class;
+    }
 }

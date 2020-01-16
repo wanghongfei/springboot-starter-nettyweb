@@ -156,7 +156,7 @@ public class NettyWebHandler extends ChannelInboundHandlerAdapter {
 
             Annotation[] anns = field.getAnnotations();
             for (Annotation an : anns) {
-                validatorMapping.invokeValidator(an, field.get(param));
+                validatorMapping.invokeValidator(an, field.get(param), field.getType());
             }
         });
     }

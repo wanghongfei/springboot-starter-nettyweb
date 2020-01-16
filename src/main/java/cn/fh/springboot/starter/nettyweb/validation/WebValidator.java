@@ -7,4 +7,6 @@ import java.lang.annotation.Annotation;
  */
 public interface WebValidator<T_OBJ, T_ANN extends Annotation> {
     void validate(T_OBJ argument, T_ANN anntation);
+
+    boolean isSupported(Class<?> type);
 }
