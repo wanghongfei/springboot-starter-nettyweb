@@ -11,6 +11,8 @@ import java.lang.annotation.Target;
 @Target({ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface StringCandidate {
+    boolean canNull() default false;
+
     String[] candidates();
 
     String message() default "";

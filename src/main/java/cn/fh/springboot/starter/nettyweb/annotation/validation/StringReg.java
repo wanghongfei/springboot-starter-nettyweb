@@ -11,6 +11,8 @@ import java.lang.annotation.Target;
 @Target({ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface StringReg {
+    boolean canNull() default false;
+
     String pattern();
     String message();
 }

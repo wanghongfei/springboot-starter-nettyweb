@@ -10,6 +10,10 @@ import org.apache.commons.lang3.StringUtils;
 public class StringLenValidator implements WebValidator<String, StringLen> {
     @Override
     public void validate(String argument, StringLen anntation) {
+        if (anntation.canNull() && null == argument) {
+            return;
+        }
+
         int argLen = StringUtils.length(argument);
         if (argLen < anntation.min() || argLen > anntation.max()) {
             throw new ValidationException(anntation.message());

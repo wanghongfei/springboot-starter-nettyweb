@@ -11,6 +11,8 @@ import java.lang.annotation.Target;
 @Target({ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface StringLen {
+    boolean canNull() default false;
+
     int min();
     int max();
     String message() default "";

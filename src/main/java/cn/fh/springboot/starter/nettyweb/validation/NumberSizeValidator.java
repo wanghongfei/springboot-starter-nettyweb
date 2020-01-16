@@ -9,6 +9,10 @@ import cn.fh.springboot.starter.nettyweb.error.ValidationException;
 public class NumberSizeValidator implements WebValidator<Number, NumberSize> {
     @Override
     public void validate(Number argument, NumberSize anntation) {
+        if (anntation.canNull() && null == argument) {
+            return;
+        }
+
         if (null == argument) {
             throw new ValidationException(anntation.message());
         }

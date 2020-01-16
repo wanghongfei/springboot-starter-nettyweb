@@ -9,6 +9,10 @@ import cn.fh.springboot.starter.nettyweb.error.ValidationException;
 public class StringCandidateValidator implements WebValidator<String, StringCandidate> {
     @Override
     public void validate(String argument, StringCandidate anntation) {
+        if (anntation.canNull() && null == argument) {
+            return;
+        }
+
         if (null == argument) {
             throw new ValidationException(anntation.message());
         }

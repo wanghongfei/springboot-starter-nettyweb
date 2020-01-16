@@ -11,6 +11,10 @@ import java.util.regex.Pattern;
 public class StringRegValidator implements WebValidator<String, StringReg> {
     @Override
     public void validate(String argument, StringReg anntation) {
+        if (anntation.canNull() && null == argument) {
+            return;
+        }
+
         if (null == argument) {
             throw new ValidationException(anntation.message());
         }

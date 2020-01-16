@@ -11,6 +11,10 @@ import java.util.Collection;
 public class CollectionNotEmptyValidator implements WebValidator<Collection<?>, CollectionNotEmpty> {
     @Override
     public void validate(Collection<?> argument, CollectionNotEmpty anntation) {
+        if (anntation.canNull() && null == argument) {
+            return;
+        }
+
         if (null == argument || argument.isEmpty()) {
             throw new ValidationException(anntation.message());
         }

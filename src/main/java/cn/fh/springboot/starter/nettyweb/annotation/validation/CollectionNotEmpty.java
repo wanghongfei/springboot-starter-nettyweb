@@ -11,5 +11,7 @@ import java.lang.annotation.Target;
 @Target({ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface CollectionNotEmpty {
+    boolean canNull() default false;
+
     String message();
 }
