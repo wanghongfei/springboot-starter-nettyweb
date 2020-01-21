@@ -22,6 +22,7 @@ import io.netty.handler.codec.http.QueryStringDecoder;
 import io.netty.util.AttributeKey;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.mutable.MutableObject;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.ReflectionUtils;
@@ -81,33 +82,47 @@ public class NettyWebHandler extends ChannelInboundHandlerAdapter {
         }
 
         // 取出参数对象类型
-        Class paramType = router.matchArgType(method, path);
+        Class<?> paramType = router.matchArgType(method, path);
         if (null == paramType) {
             throw new WebException("lack argument for this path");
         }
 
-
-        // 将body转成string
+        // 取出请求体
         String body = extractRequestBody(httpRequest);
-        if (method == HttpMethod.POST && StringUtils.isEmpty(body)) {
-            throw new WebException("body is empty");
-        }
 
         // 生成唯一标识
         Long uid = SnowFlake.genId();
         ctx.channel().attr(uidKey).set(uid);
-        log.info("{} request for {} {}: {}", uid, method, path, body);
 
-        // 解析参数
-        Object paramObject = deserializeParam(httpRequest, paramType, uid, body);
+        // 打印请求日志
+        log.info("{} request for {} {}, body: {}", uid, method, path, body);
+
+
+        // 参数解析
+        // 用MutableObject是为了能在lambda中传递参数对象
+        MutableObject<Object> paramObjectContainer = new MutableObject<>();
+        // 只有当参数对象类型不是Void时才需要解析参数
+        if (Void.class != paramType) {
+            // 如果是POST请求, body还为空, 报错
+            if (method == HttpMethod.POST && StringUtils.isEmpty(body)) {
+                throw new WebException("body is empty");
+            }
+
+            // 解析参数
+            Object paramObject = deserializeParam(httpRequest, paramType, uid, body);
+            paramObjectContainer.setValue(paramObject);
+        }
+
 
         // 执行参数验证
-        validateParam(paramObject, false);
+        if (null != paramObjectContainer.getValue()) {
+            validateParam(paramObjectContainer.getValue(), false);
+        }
 
         // 调用service
         servicePool.execute(() -> {
             try {
-                Object retObj = moonApi.serveRequest(paramObject);
+                Object retObj = moonApi.serveRequest(paramObjectContainer.getValue());
                 ctx.writeAndFlush(NettyWebUtils.buildOkResponse(retObj, log, path, uid));
 
             } catch (Throwable e) {
@@ -234,7 +249,11 @@ public class NettyWebHandler extends ChannelInboundHandlerAdapter {
     }
 
     private String extractRequestBody(FullHttpRequest request) {
-        return request.content().toString(StandardCharsets.UTF_8);
+        if (request.content().readableBytes() > 0) {
+            return request.content().toString(StandardCharsets.UTF_8);
+        }
+
+        return "";
     }
 
     private void injectFields(Object param, FullHttpRequest httpRequest, Long reqId) {

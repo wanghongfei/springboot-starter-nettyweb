@@ -14,9 +14,19 @@ import java.lang.annotation.Target;
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface HttpApi {
+    /**
+     * 以/开头的路径
+     */
     String path() default "";
 
-    Class paramType();
+    /**
+     * 指定接口参数对象;
+     * 不传意为此接口不需要任何参数;
+     */
+    Class<?> paramType() default Void.class;
 
+    /**
+     * 请求方法,只支持GET, POST
+     */
     String method() default "POST";
 }
