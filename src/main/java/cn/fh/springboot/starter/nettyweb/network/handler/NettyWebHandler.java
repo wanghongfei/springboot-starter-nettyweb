@@ -3,6 +3,7 @@ package cn.fh.springboot.starter.nettyweb.network.handler;
 import cn.fh.springboot.starter.nettyweb.annotation.validation.Validation;
 import cn.fh.springboot.starter.nettyweb.autoconfig.NettyWebProp;
 import cn.fh.springboot.starter.nettyweb.error.WebException;
+import cn.fh.springboot.starter.nettyweb.network.RawRequestHandler;
 import cn.fh.springboot.starter.nettyweb.network.RequestHandler;
 import cn.fh.springboot.starter.nettyweb.network.WebRouter;
 import cn.fh.springboot.starter.nettyweb.network.inject.InjectHeaders;
@@ -76,8 +77,8 @@ public class NettyWebHandler extends ChannelInboundHandlerAdapter {
         ctx.channel().attr(uriKey).set(path);
 
         // 取出service
-        RequestHandler moonApi = router.matchHandler(method, path);
-        if (null == moonApi) {
+        RequestHandler handler = router.matchHandler(method, path);
+        if (null == handler) {
             throw new WebException("404");
         }
 
@@ -122,7 +123,14 @@ public class NettyWebHandler extends ChannelInboundHandlerAdapter {
         // 调用service
         servicePool.execute(() -> {
             try {
-                Object retObj = moonApi.serveRequest(paramObjectContainer.getValue());
+                Object retObj = null;
+                if (handler instanceof RawRequestHandler) {
+                    retObj = ((RawRequestHandler) handler).serveRequest();
+
+                } else {
+                    retObj = handler.serveRequest(paramObjectContainer.getValue());
+                }
+
                 ctx.writeAndFlush(NettyWebUtils.buildOkResponse(retObj, log, path, uid));
 
             } catch (Throwable e) {

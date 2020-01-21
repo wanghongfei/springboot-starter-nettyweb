@@ -29,8 +29,8 @@ public class NettyWebAutoConfiguration {
     }
 
     @Bean
-    public ServiceRegisterBean serviceRegisterBean() {
-        return new ServiceRegisterBean();
+    public HandlerRegisterBean serviceRegisterBean() {
+        return new HandlerRegisterBean();
     }
 
     @Bean
