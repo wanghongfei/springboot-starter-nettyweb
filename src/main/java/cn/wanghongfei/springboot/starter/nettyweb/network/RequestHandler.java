@@ -3,9 +3,10 @@ package cn.wanghongfei.springboot.starter.nettyweb.network;
 import io.netty.handler.codec.http.HttpHeaders;
 
 /**
- * 所有业务类都要实现此接口
+ * 所有HTTP请求处理器都要实现此接口
  *
  * @param <T> 请求参数类型
+ * @param <R> 请求处理方法的返回类型
  */
 public interface RequestHandler<T, R> {
     /**
