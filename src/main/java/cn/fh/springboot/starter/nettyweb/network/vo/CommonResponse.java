@@ -11,9 +11,12 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CommonResponse {
-    private int code;
+    private int code = CODE_OK;
 
     private String message;
 
     private Object data;
+
+    public static transient final int CODE_OK = 0;
+    public static transient final String MESSAGE_OK = "ok";
 }

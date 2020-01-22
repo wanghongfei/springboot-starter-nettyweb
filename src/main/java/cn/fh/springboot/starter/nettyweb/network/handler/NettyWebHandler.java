@@ -9,15 +9,17 @@ import cn.fh.springboot.starter.nettyweb.network.WebRouter;
 import cn.fh.springboot.starter.nettyweb.network.inject.InjectHeaders;
 import cn.fh.springboot.starter.nettyweb.network.inject.InjectLoginToken;
 import cn.fh.springboot.starter.nettyweb.network.inject.InjectRequestId;
-import cn.fh.springboot.starter.nettyweb.utils.NettyWebUtils;
+import cn.fh.springboot.starter.nettyweb.network.vo.CommonResponse;
 import cn.fh.springboot.starter.nettyweb.utils.SnowFlake;
 import cn.fh.springboot.starter.nettyweb.validation.ValidatorMapping;
 import com.alibaba.fastjson.JSON;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.codec.http.FullHttpRequest;
+import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.QueryStringDecoder;
 import io.netty.util.AttributeKey;
@@ -59,6 +61,9 @@ public class NettyWebHandler extends ChannelInboundHandlerAdapter {
 
     @Autowired
     private ValidatorMapping validatorMapping;
+
+    @Autowired
+    private NettyResponseBuilder responseBuilder;
 
     private ThreadPoolExecutor servicePool;
 
@@ -131,7 +136,11 @@ public class NettyWebHandler extends ChannelInboundHandlerAdapter {
                     retObj = handler.serveRequest(paramObjectContainer.getValue());
                 }
 
-                ctx.writeAndFlush(NettyWebUtils.buildOkResponse(retObj, log, path, uid));
+                FullHttpResponse response =
+                        responseBuilder.buildHttpResponse(retObj, CommonResponse.MESSAGE_OK, CommonResponse.CODE_OK, log, path, uid);
+                handler.modifyHeader(response.headers(), retObj);
+
+                ctx.writeAndFlush(response);
 
             } catch (Throwable e) {
                 exceptionCaught(ctx, e);
@@ -155,8 +164,9 @@ public class NettyWebHandler extends ChannelInboundHandlerAdapter {
         String path = ctx.channel().attr(uriKey).get();
         Long uid = ctx.channel().attr(uidKey).get();
 
-        ctx.writeAndFlush(NettyWebUtils.buildErrResponse(codeAndMessage.getMessage(), codeAndMessage.getCode(), log, path, uid));
-        ctx.close();
+        FullHttpResponse response =
+                responseBuilder.buildHttpResponse(null, codeAndMessage.getMessage(), codeAndMessage.getCode(), log, path, uid);
+        ctx.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
     }
 
     public void close() {
@@ -303,6 +313,39 @@ public class NettyWebHandler extends ChannelInboundHandlerAdapter {
             throw new WebException("body does not match");
         }
     }
+
+//    private FullHttpResponse buildErrResponse(String message, int code, Logger log, String prefix, Long uid) {
+//        CommonResponse response = new CommonResponse();
+//        response.setCode(code);
+//        response.setMessage(message);
+//
+//        String json = JSON.toJSONString(response);
+//
+//        log.info("{} response for {}: {}", prefix, uid, json);
+//
+//        FullHttpResponse httpResponse =
+//                new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, Unpooled.copiedBuffer(json, StandardCharsets.UTF_8));
+//        httpResponse.headers().add("Content-Type", "application/json;charset=utf8");
+//
+//        return httpResponse;
+//    }
+//
+//    private FullHttpResponse buildOkResponse(Object data, Logger log, String prefix, Long uid) {
+//        CommonResponse response = new CommonResponse();
+//        response.setCode(0);
+//        response.setMessage("ok");
+//        response.setData(data);
+//
+//        String json = JSON.toJSONString(response);
+//
+//        log.info("{} response for {}: {}", prefix, uid, json);
+//
+//        FullHttpResponse httpResponse =
+//                new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, Unpooled.copiedBuffer(json, StandardCharsets.UTF_8));
+//        httpResponse.headers().add("Content-Type", "application/json;charset=utf8");
+//
+//        return httpResponse;
+//    }
 
     @PostConstruct
     private void initPool() {

@@ -2,6 +2,7 @@ package cn.fh.springboot.starter.nettyweb.autoconfig;
 
 import cn.fh.springboot.starter.nettyweb.network.NettyWebServer;
 import cn.fh.springboot.starter.nettyweb.network.WebRouter;
+import cn.fh.springboot.starter.nettyweb.network.handler.NettyResponseBuilder;
 import cn.fh.springboot.starter.nettyweb.network.handler.NettyWebExceptionHandler;
 import cn.fh.springboot.starter.nettyweb.network.handler.NettyWebHandler;
 import cn.fh.springboot.starter.nettyweb.validation.ValidatorMapping;
@@ -47,5 +48,11 @@ public class NettyWebAutoConfiguration {
     @Bean
     public ValidatorMapping validatorMapping() {
         return new ValidatorMapping();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public NettyResponseBuilder nettyResponseBuilder() {
+        return new NettyResponseBuilder();
     }
 }
