@@ -1,2 +1,2 @@
 # Auto Configure
-org.springframework.boot.autoconfigure.EnableAutoConfiguration=cn.fh.springboot.starter.nettyweb.autoconfig.NettyWebAutoConfiguration
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=cn.wanghongfei.springboot.starter.nettyweb.autoconfig.NettyWebAutoConfiguration
