@@ -71,6 +71,29 @@ public class DemoApi implements RequestHandler<DemoRequest, String> {
 
 
 
+### 修改响应Header
+
+如果需要修改响应头，则需要实现`RequestHander`的`default`方法`modifyHeader`：
+
+```json
+@HttpApi(path = "/", paramType = DemoRequest.class, method = "POST")
+public class DemoApi implements RequestHandler<DemoRequest, String> {
+    @Override
+    public String serveRequest(DemoRequest request) {
+        return request.toString();
+    }
+    
+    @Override
+    public void modifyHeader(HttpHeaders headers, String data) {
+        headers.add("My-Header", data);
+    }
+}
+```
+
+
+
+
+
 ### 特定参数注入
 
 为了避免使用反射，NettyWeb通过探测参数对象是否实现了指定接口来"注入"一些特定参数，如完整的请求头和请求唯一id。
