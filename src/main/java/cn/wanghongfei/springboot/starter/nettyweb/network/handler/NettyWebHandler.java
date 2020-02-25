@@ -314,39 +314,6 @@ public class NettyWebHandler extends ChannelInboundHandlerAdapter {
         }
     }
 
-//    private FullHttpResponse buildErrResponse(String message, int code, Logger log, String prefix, Long uid) {
-//        CommonResponse response = new CommonResponse();
-//        response.setCode(code);
-//        response.setMessage(message);
-//
-//        String json = JSON.toJSONString(response);
-//
-//        log.info("{} response for {}: {}", prefix, uid, json);
-//
-//        FullHttpResponse httpResponse =
-//                new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, Unpooled.copiedBuffer(json, StandardCharsets.UTF_8));
-//        httpResponse.headers().add("Content-Type", "application/json;charset=utf8");
-//
-//        return httpResponse;
-//    }
-//
-//    private FullHttpResponse buildOkResponse(Object data, Logger log, String prefix, Long uid) {
-//        CommonResponse response = new CommonResponse();
-//        response.setCode(0);
-//        response.setMessage("ok");
-//        response.setData(data);
-//
-//        String json = JSON.toJSONString(response);
-//
-//        log.info("{} response for {}: {}", prefix, uid, json);
-//
-//        FullHttpResponse httpResponse =
-//                new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, Unpooled.copiedBuffer(json, StandardCharsets.UTF_8));
-//        httpResponse.headers().add("Content-Type", "application/json;charset=utf8");
-//
-//        return httpResponse;
-//    }
-
     @PostConstruct
     private void initPool() {
         servicePool = new ThreadPoolExecutor(
