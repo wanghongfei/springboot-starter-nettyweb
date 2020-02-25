@@ -32,9 +32,9 @@ NettyWeb实现了一个Web框架所应该具有的最基本功能：
 
 
 
-Get请求Demo: cn.wanghongfei.springboot.starter.nettyweb.api.DemoGetApi
+Get请求Demo: test目录下的DemoGetApi.java
 
-Post请求Demo: cn.wanghongfei.springboot.starter.nettyweb.api.DemoPostApi
+Post请求Demo: test目录下的DemoPostApi.java
 
 
 
