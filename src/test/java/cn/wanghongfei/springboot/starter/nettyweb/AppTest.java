@@ -1,7 +1,11 @@
 package cn.wanghongfei.springboot.starter.nettyweb;
 
+import cn.wanghongfei.springboot.starter.nettyweb.api.DemoRequest;
+import com.alibaba.fastjson.JSON;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
@@ -18,7 +22,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 @RunWith(SpringRunner.class)
 public class AppTest {
     @Test
-    public void testServerStart() throws Exception {
+    public void testGet() throws Exception {
         CloseableHttpClient client = HttpClients.createDefault();
         HttpGet get = new HttpGet("http://localhost:9090/?name=whf");
         get.setHeader("Connection", "close");
@@ -27,5 +31,25 @@ public class AppTest {
 
         System.out.println(resp);
         Assert.assertEquals("{\"code\":0,\"data\":\"hello, whf\",\"message\":\"ok\"}", resp);
+    }
+
+    @Test
+    public void testPost() throws Exception {
+        CloseableHttpClient client = HttpClients.createDefault();
+        HttpPost post = new HttpPost("http://localhost:9090/post");
+        post.setHeader("Connection", "close");
+
+        DemoRequest req = new DemoRequest();
+        req.setName("whf");
+        String body = JSON.toJSONString(req);
+
+        post.setEntity(new StringEntity(body));
+
+        CloseableHttpResponse response = client.execute(post);
+        String resp = EntityUtils.toString(response.getEntity());
+
+        System.out.println(resp);
+        Assert.assertEquals("{\"code\":0,\"data\":\"post, whf\",\"message\":\"ok\"}", resp);
+
     }
 }

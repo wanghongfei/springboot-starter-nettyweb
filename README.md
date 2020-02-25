@@ -32,6 +32,12 @@ NettyWeb实现了一个Web框架所应该具有的最基本功能：
 
 
 
+Get请求Demo: cn.wanghongfei.springboot.starter.nettyweb.api.DemoGetApi
+
+Post请求Demo: cn.wanghongfei.springboot.starter.nettyweb.api.DemoPostApi
+
+
+
 ### 定义请求处理器
 
 为了避免使用反射，NettyWeb没有像SpringMVC那样支持将任意方法指定为请求处理器，而是必须定义一个类实现`RequestHandler`接口，同时加上`@HttpApi`注解，如：
