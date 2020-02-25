@@ -1,0 +1,12 @@
+nettyweb:
+  port: 9090
+  start-web-server: true
+  boss-group-thread-count: 1
+  work-group-thread-count: 1
+
+  http-object-max-size: 5242880
+  login-token-header-name: "Login-Token"
+
+  service-pool-core-size: 1
+
+

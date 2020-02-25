@@ -19,11 +19,11 @@ import io.netty.handler.codec.http.HttpServerCodec;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 
 import javax.annotation.PreDestroy;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 /**
  * Created by wanghongfei on 2019/11/4.
@@ -32,9 +32,6 @@ import java.util.concurrent.TimeUnit;
 public class NettyWebServer {
     private EventLoopGroup bossGroup;
     private EventLoopGroup workGroup;
-
-    @Value("${server.port}")
-    private int port;
 
     @Autowired
     private NettyWebHandler handler;
@@ -45,6 +42,18 @@ public class NettyWebServer {
     private volatile boolean isClosing = false;
 
     public void start() {
+        start(null);
+    }
+
+    public void startWithCallback(Consumer<Throwable> callback) {
+        if (null == callback) {
+            throw new NettyWebStartException("callback cannot be null");
+        }
+
+        start(callback);
+    }
+
+    private void start(Consumer<Throwable> callback) {
         log.info("Starting NettyWeb");
 
         CountDownLatch webStartLatch = new CountDownLatch(1);
@@ -69,8 +78,8 @@ public class NettyWebServer {
                             }
                         });
 
-                ChannelFuture f = bootstrap.bind(port).sync();
-                log.info("NettyWeb started at {}", port);
+                ChannelFuture f = bootstrap.bind(prop.getPort()).sync();
+                log.info("NettyWeb started at {}", prop.getPort());
 
                 webStartLatch.countDown();
 
@@ -94,14 +103,18 @@ public class NettyWebServer {
         webThread.start();
 
         try {
-            webStartLatch.await(30, TimeUnit.SECONDS);
+            webStartLatch.await(10, TimeUnit.SECONDS);
             if (null != excaptionBox.getValue()) {
+                invokeCallback(callback, excaptionBox.getValue());
                 throw excaptionBox.getValue();
             }
 
         } catch (InterruptedException e) {
             e.printStackTrace();
+            callback.accept(e);
         }
+
+        invokeCallback(callback, null);
     }
 
     @PreDestroy
@@ -114,6 +127,12 @@ public class NettyWebServer {
             bossGroup.shutdownGracefully();
             workGroup.shutdownGracefully();
             handler.close();
+        }
+    }
+
+    private void invokeCallback(Consumer<Throwable> callback, Throwable err) {
+        if (null != callback) {
+            callback.accept(err);
         }
     }
 

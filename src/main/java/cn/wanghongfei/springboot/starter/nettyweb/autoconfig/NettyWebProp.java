@@ -4,17 +4,16 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.stereotype.Component;
 
 /**
  * Created by wanghongfei on 2020/1/7.
  */
 @ConfigurationProperties(prefix = "nettyweb")
-@Component
 @Getter
 @Setter
 @ToString
 public class NettyWebProp {
+    private Integer port = 8080;
     /**
      * netty boss线程数量
      */
