@@ -75,7 +75,7 @@ public class DemoApi implements RequestHandler<DemoRequest, String> {
 
 如果需要修改响应头，则需要实现`RequestHander`的`default`方法`modifyHeader`：
 
-```json
+```java
 @HttpApi(path = "/", paramType = DemoRequest.class, method = "POST")
 public class DemoApi implements RequestHandler<DemoRequest, String> {
     @Override
@@ -100,7 +100,7 @@ public class DemoApi implements RequestHandler<DemoRequest, String> {
 
 如果需要获取框架给当前请求自动生成的唯一id, 可以让参数对象实现`InjectRequestId`接口：
 
-```json
+```java
 public class DemoRequest implements InjectRequestId {
     @JSONField(serialize = false, deserialize = false)
     private Long requestId;
@@ -148,7 +148,7 @@ public class DemoRequest implements InjectHeaders {
 
 同样，如果嫌麻烦，可以直接继承`RequestHeaderVO`类：
 
-```json
+```java
 public class DemoRequest extends RequestHeaderVO {
 }
 ```
