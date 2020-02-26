@@ -8,10 +8,26 @@
     <artifactId>spring-boot-starter-nettyweb</artifactId>
     <version>1.0</version>
 
+    <name>springboot-starter-nettyweb</name>
+    <description>An easy-to-use, lightweight starter that integrates Netty with SpringBoot</description>
+    <url>https://github.com/wanghongfei/springboot-starter-nettyweb</url>
+
+    <licenses>
+        <license>
+            <name>MIT License</name>
+            <url>https://github.com/wanghongfei/springboot-starter-nettyweb/blob/master/LICENSE</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+    <scm>
+        <url>https://github.com/wanghongfei/springboot-starter-nettyweb</url>
+        <connection>scm:git:git@github.com:wanghongfei/springboot-starter-nettyweb.git</connection>
+        <developerConnection>scm:git:git@github.com:wanghongfei/springboot-starter-nettyweb.git</developerConnection>
+    </scm>
+
     <dependencyManagement>
         <dependencies>
             <dependency>
-                <!-- Import dependency management from Spring Boot -->
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-dependencies</artifactId>
                 <version>2.2.1.RELEASE</version>
@@ -34,6 +50,20 @@
             </snapshots>
         </repository>
     </repositories>
+
+    <distributionManagement>
+        <repository>
+            <id>my-maven-central</id>
+            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+        </repository>
+    </distributionManagement>
+
+    <developers>
+        <developer>
+            <name>wanghongfei</name>
+            <email>brucewhf@gmail.com</email>
+        </developer>
+    </developers>
 
     <dependencies>
         <dependency>
