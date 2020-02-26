@@ -33,8 +33,9 @@ NettyWeb实现了一个Web框架所应该具有的最基本功能：
 
 
 Get请求Demo: test目录下的DemoGetApi.java
-
 Post请求Demo: test目录下的DemoPostApi.java
+无参数请求Demo: test目录下的DemoEmptyApi.java
+
 
 
 

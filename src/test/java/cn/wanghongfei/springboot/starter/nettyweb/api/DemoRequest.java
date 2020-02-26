@@ -7,5 +7,6 @@ import lombok.Data;
  */
 @Data
 public class DemoRequest {
+    private Long id;
     private String name;
 }

@@ -10,6 +10,6 @@ import cn.wanghongfei.springboot.starter.nettyweb.network.RequestHandler;
 public class DemoGetApi implements RequestHandler<DemoRequest, String> {
     @Override
     public String serveRequest(DemoRequest request) {
-        return "hello, " + request.getName();
+        return "hello, " + request.getName() + ", " + request.getId();
     }
 }

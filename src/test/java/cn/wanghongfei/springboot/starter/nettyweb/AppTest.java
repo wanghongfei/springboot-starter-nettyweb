@@ -24,13 +24,13 @@ public class AppTest {
     @Test
     public void testGet() throws Exception {
         CloseableHttpClient client = HttpClients.createDefault();
-        HttpGet get = new HttpGet("http://localhost:9090/?name=whf");
+        HttpGet get = new HttpGet("http://localhost:9090/?name=whf&id=100");
         get.setHeader("Connection", "close");
         CloseableHttpResponse response = client.execute(get);
         String resp = EntityUtils.toString(response.getEntity());
 
         System.out.println(resp);
-        Assert.assertEquals("{\"code\":0,\"data\":\"hello, whf\",\"message\":\"ok\"}", resp);
+        Assert.assertEquals("{\"code\":0,\"data\":\"hello, whf, 100\",\"message\":\"ok\"}", resp);
     }
 
     @Test
@@ -50,6 +50,19 @@ public class AppTest {
 
         System.out.println(resp);
         Assert.assertEquals("{\"code\":0,\"data\":\"post, whf\",\"message\":\"ok\"}", resp);
+
+    }
+
+    @Test
+    public void testNoArg() throws Exception {
+        CloseableHttpClient client = HttpClients.createDefault();
+        HttpGet get = new HttpGet("http://localhost:9090/raw");
+        get.setHeader("Connection", "close");
+        CloseableHttpResponse response = client.execute(get);
+        String resp = EntityUtils.toString(response.getEntity());
+
+        System.out.println(resp);
+        Assert.assertEquals("{\"code\":0,\"data\":\"raw\",\"message\":\"ok\"}", resp);
 
     }
 }
