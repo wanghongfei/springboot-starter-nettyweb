@@ -6,7 +6,7 @@
 
     <groupId>cn.wanghongfei</groupId>
     <artifactId>spring-boot-starter-nettyweb</artifactId>
-    <version>1.1-SNAPSHOT</version>
+    <version>1.2-SNAPSHOT</version>
 
     <dependencyManagement>
         <dependencies>

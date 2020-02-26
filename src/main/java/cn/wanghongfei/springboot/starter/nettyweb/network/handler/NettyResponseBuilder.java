@@ -17,12 +17,9 @@ import java.nio.charset.StandardCharsets;
  */
 public class NettyResponseBuilder {
     protected FullHttpResponse buildHttpResponse(Object data, String message, int code, Logger log, String prefix, Long uid) {
-        CommonResponse response = new CommonResponse();
-        response.setCode(code);
-        response.setMessage(message);
-        response.setData(data);
+        Object responseObject = buildResponseObject(data, message, code);
 
-        String json = JSON.toJSONString(response);
+        String json = JSON.toJSONString(responseObject);
 
         log.info("{} response for {}: {}", prefix, uid, json);
 
@@ -33,6 +30,21 @@ public class NettyResponseBuilder {
         modifyHeader(httpResponse.headers());
 
         return httpResponse;
+    }
+
+    /**
+     * 子类可以重写此方法来提供自定义返回格式
+     * @param data 业务返回的对象
+     *
+     * @return 返回的对象会被JSON序列化发送给客户端
+     */
+    protected Object buildResponseObject(Object data, String message, int code) {
+        CommonResponse response = new CommonResponse();
+        response.setCode(code);
+        response.setMessage(message);
+        response.setData(data);
+
+        return response;
     }
 
     /**

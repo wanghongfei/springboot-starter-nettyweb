@@ -12,7 +12,7 @@ NettyWeb实现了一个Web框架所应该具有的最基本功能：
 - 参数绑定、验证
 - 为每一个请求自动生成唯一id, 方便日志统计
 
-同时，作为一个API框架，NettyWeb仅支持返回**固定的JSON格式**的数据，不具备页面渲染功能。
+同时，作为一个API框架，NettyWeb仅支持返回**JSON格式**的数据，不具备页面渲染功能。
 
 请求路由这块并没有使用Trie-Tree, 而是直接HashMap精确匹配，简单粗暴高性能。承认吧，其实绝大多数时候你并不需要`/item/{Id}`，也不需要`/item/*`，就算需要了，也有办法替换。
 
@@ -26,7 +26,7 @@ NettyWeb实现了一个Web框架所应该具有的最基本功能：
 <dependency>
     <groupId>cn.wanghongfei</groupId>
     <artifactId>spring-boot-starter-nettyweb</artifactId>
-    <version>1.1-SNAPSHOT</version>
+    <version>1.2-SNAPSHOT</version>
 </dependency>
 ```
 
@@ -68,7 +68,7 @@ public class DemoApi implements RequestHandler<DemoRequest, String> {
 
 当请求方法为`GET`时， NettyWeb会从URL里的`Query String`中解析参数并**忽略请求体**；如果是`POST`请求则会将请求体视为JSON并将其反序列化为参数对象。
 
-响应的JSON格式是固定的，如下：
+响应的JSON格式默认如下：
 
 ```json
 {
@@ -216,6 +216,32 @@ public class DemoRequest {
     private UserInfo userInfo;
 }
 ```
+
+
+
+### 自定义响应数据格式
+
+如果默认的响应json格式不满足要求，可以继承框架的`NettyResponseBuilder`重新实现`buildResponseObject()`方法，然后注册为Spring Bean，如：
+
+```java
+@Component
+public class MyResponseBuilder extends NettyResponseBuilder {
+    @Override
+    protected Object buildResponseObject(Object data, String message, int code) {
+        MyResponse response = new MyResponse();
+        response.setData(data);
+
+        return response;
+    }
+
+    @Data
+    public static class MyResponse {
+        private Object data;
+    }
+}
+```
+
+
 
 
 
