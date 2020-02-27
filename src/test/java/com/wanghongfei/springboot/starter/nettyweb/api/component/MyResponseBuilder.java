@@ -1,4 +1,4 @@
-package com.wanghongfei.springboot.starter.nettyweb.api;
+package com.wanghongfei.springboot.starter.nettyweb.api.component;
 
 import com.wanghongfei.springboot.starter.nettyweb.network.handler.NettyResponseBuilder;
 import lombok.Data;
