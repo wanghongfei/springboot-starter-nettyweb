@@ -6,7 +6,7 @@
 
     <groupId>com.wanghongfei</groupId>
     <artifactId>spring-boot-starter-nettyweb</artifactId>
-    <version>1.0</version>
+    <version>1.1</version>
 
     <name>springboot-starter-nettyweb</name>
     <description>An easy-to-use, lightweight starter that integrates Netty with SpringBoot</description>

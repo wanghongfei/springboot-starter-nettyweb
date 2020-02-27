@@ -1,4 +1,4 @@
-package com.wanghongfei.springboot.starter.nettyweb.network;
+package com.wanghongfei.springboot.starter.nettyweb.network.handler;
 
 import io.netty.handler.codec.http.HttpHeaders;
 

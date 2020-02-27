@@ -40,6 +40,8 @@ Post请求Demo: test目录下的DemoPostApi.java
 
 无参数请求Demo: test目录下的DemoEmptyApi.java
 
+带过滤器的请求Demo: test目录下的DemoAroundApi.java
+
 
 
 
@@ -79,6 +81,46 @@ public class DemoApi implements RequestHandler<DemoRequest, String> {
 ```
 
 请求处理方法返回的业务数据对象会在`data`中体现，如果返回String, 则`data`的值是string类型，如果返回复杂对象，则`data`的值是object类型。
+
+
+
+### 实现Pre、Post过滤器
+
+让自己的请求处理器实现`AroundRequestHandler`可以实现类似于SpringMVC中过滤器的功能：
+
+```java
+@HttpApi(path = "/around", paramType = DemoRequest.class)
+public class DemoAroundApi implements AroundRequestHandler<DemoRequest, String> {
+    @Override
+    public String serveRequest(DemoRequest request) {
+        System.out.println("middle");
+        return "ok";
+    }
+
+    @Override
+    public boolean before(DemoRequest demoRequest, ChannelHandlerContext context) {
+        System.out.println("before");
+
+        // 可直接写入响应数据
+        // context.writeAndFlush(new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, Unpooled.copiedBuffer("break", StandardCharsets.UTF_8)));
+
+        // false表示中断处理流程; 如果返回false, 务必保证已经通过context返回了适当的数据
+        // return false
+        return true;
+    }
+
+    @Override
+    public void after(DemoRequest demoRequest, String retObject) {
+        System.out.println("after");
+
+    }
+}
+
+```
+
+其中，`before()`方法会在`serveRequest()`之前调用，如果返回`false`则表示终止后续处理。注意此时一定要用参数里传入的`context`引用给客户端返回适当的数据，否则此HTTP请求会无响应。
+
+`after()`方法会在`serveRequest()`之后调用，前提是`serveRequest()`正常返回没有跑出异常。
 
 
 

@@ -92,6 +92,37 @@ public class ApiTest {
         Assert.assertEquals("{\"code\":400,\"message\":\"invalid age\"}", resp);
     }
 
+    @Test
+    public void testAroundApi() throws Exception {
+
+        DemoRequest req = new DemoRequest();
+        req.setName("whf");
+        String body = JSON.toJSONString(req);
+
+        HttpPost post = new HttpPost("http://localhost:9090/around");
+        post.setEntity(new StringEntity(body));
+
+        String resp = sendRequest(post);
+
+        System.out.println(resp);
+    }
+
+    @Test
+    public void testBreakAroundApi() throws Exception {
+        DemoRequest req = new DemoRequest();
+        req.setName("whf");
+        String body = JSON.toJSONString(req);
+
+        HttpPost post = new HttpPost("http://localhost:9090/around/break");
+        post.setEntity(new StringEntity(body));
+
+        String resp = sendRequest(post);
+
+        System.out.println(resp);
+        Assert.assertEquals("break", resp);
+
+    }
+
     public String sendRequest(HttpUriRequest request) throws IOException {
         CloseableHttpClient client = null;
         CloseableHttpResponse response = null;

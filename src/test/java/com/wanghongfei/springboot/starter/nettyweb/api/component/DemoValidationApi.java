@@ -1,7 +1,7 @@
 package com.wanghongfei.springboot.starter.nettyweb.api.component;
 
 import com.wanghongfei.springboot.starter.nettyweb.annotation.HttpApi;
-import com.wanghongfei.springboot.starter.nettyweb.network.RequestHandler;
+import com.wanghongfei.springboot.starter.nettyweb.network.handler.RequestHandler;
 
 /**
  * Created by wanghongfei on 2020/2/27.

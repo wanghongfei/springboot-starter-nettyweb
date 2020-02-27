@@ -1,10 +1,10 @@
 package com.wanghongfei.springboot.starter.nettyweb.network.handler;
 
+import com.alibaba.fastjson.JSON;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.wanghongfei.springboot.starter.nettyweb.annotation.validation.Validation;
 import com.wanghongfei.springboot.starter.nettyweb.autoconfig.NettyWebProp;
 import com.wanghongfei.springboot.starter.nettyweb.error.WebException;
-import com.wanghongfei.springboot.starter.nettyweb.network.RawRequestHandler;
-import com.wanghongfei.springboot.starter.nettyweb.network.RequestHandler;
 import com.wanghongfei.springboot.starter.nettyweb.network.WebRouter;
 import com.wanghongfei.springboot.starter.nettyweb.network.inject.InjectHeaders;
 import com.wanghongfei.springboot.starter.nettyweb.network.inject.InjectLoginToken;
@@ -12,8 +12,6 @@ import com.wanghongfei.springboot.starter.nettyweb.network.inject.InjectRequestI
 import com.wanghongfei.springboot.starter.nettyweb.network.vo.CommonResponse;
 import com.wanghongfei.springboot.starter.nettyweb.utils.SnowFlake;
 import com.wanghongfei.springboot.starter.nettyweb.validation.ValidatorMapping;
-import com.alibaba.fastjson.JSON;
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
@@ -130,9 +128,27 @@ public class NettyWebHandler extends ChannelInboundHandlerAdapter {
             try {
                 Object retObj = null;
                 if (handler instanceof RawRequestHandler) {
+                    // 是无参数的handler
                     retObj = ((RawRequestHandler) handler).serveRequest();
 
+                } else if (handler instanceof AroundRequestHandler) {
+                    // 是带有pre, post处理器的handler
+                    AroundRequestHandler aroundHandler = (AroundRequestHandler) handler;
+
+                    // 调用前置方法
+                    boolean canContinue = aroundHandler.before(paramObjectContainer.getValue(), ctx);
+                    if (!canContinue) {
+                        return;
+                    }
+
+                    // 调用业务逻辑
+                    retObj = aroundHandler.serveRequest(paramObjectContainer.getValue());
+
+                    // 调用后置方法
+                    aroundHandler.after(paramObjectContainer.getValue(), retObj);
+
                 } else {
+                    // 是普通的handler
                     retObj = handler.serveRequest(paramObjectContainer.getValue());
                 }
 
