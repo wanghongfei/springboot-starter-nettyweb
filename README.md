@@ -26,7 +26,7 @@ NettyWeb实现了一个Web框架所应该具有的最基本功能：
 <dependency>
     <groupId>com.wanghongfei</groupId>
     <artifactId>spring-boot-starter-nettyweb</artifactId>
-    <version>1.0</version>
+    <version>1.1</version>
 </dependency>
 ```
 
